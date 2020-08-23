@@ -52,6 +52,13 @@ dependencies:
   fluttertoast: ^7.0.1
   cached_network_image: ^2.2.0+1
   carousel_slider: ^2.2.1
+  geolocator: ^5.3.2+2
+  stripe_payment: ^1.0.7
+  http: ^0.12.2
+  firebase_messaging: ^6.0.16
+  carousel_pro: ^1.0.0
+  curved_navigation_bar: ^0.3.2
+  flutter_icons: ^1.1.0
 
 
 dev_dependencies:
@@ -85,6 +92,9 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/event.jpg
+    - assets/ad1.jpeg
+    - assets/ad2.jpeg
+    - assets/ad3.jpeg 
  
 
   # An image asset can refer to one or more resolution-specific "variants", see

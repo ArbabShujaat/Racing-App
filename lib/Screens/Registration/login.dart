@@ -4,7 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:provider/provider.dart';
 import 'package:racingApp/Constants/constant.dart';
+import 'package:racingApp/Providers/user.dart';
 import 'package:racingApp/Widgets/custom_shape.dart';
 import 'package:racingApp/Widgets/custom_textfield.dart';
 import 'package:racingApp/Widgets/customappbar.dart';
@@ -37,6 +39,7 @@ class _SignInScreenState extends State<SignInScreen> {
   TextEditingController passwordController = TextEditingController();
   GlobalKey<FormState> _key = GlobalKey();
 
+  ///main ui function for screen
   @override
   Widget build(BuildContext context) {
     _height = MediaQuery.of(context).size.height;
@@ -73,6 +76,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  ///design at the top of the page ui
   Widget clipShape() {
     //double height = MediaQuery.of(context).size.height;
     return Stack(
@@ -109,6 +113,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  ///welcome text ui
   Widget welcomeTextRow() {
     return Container(
       margin: EdgeInsets.only(left: _width / 20, top: _height / 120),
@@ -126,6 +131,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  ///sign in text at the top ui
   Widget signInTextRow() {
     return Container(
       margin: EdgeInsets.only(left: _width / 15.0),
@@ -143,6 +149,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  ///UI section for login form
   Widget form() {
     return Container(
       margin: EdgeInsets.only(
@@ -160,12 +167,19 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  ///FOrm fields for login form
   Widget emailTextFormField() {
     return CustomTextField(
       keyboardType: TextInputType.emailAddress,
       textEditingController: emailController,
       icon: Icons.email,
       hint: "Email ID",
+      validator: (String val) {
+        if (val.trim().isEmpty) {
+          return 'Email must not be empty';
+        }
+        return null;
+      },
     );
   }
 
@@ -176,9 +190,16 @@ class _SignInScreenState extends State<SignInScreen> {
       icon: Icons.lock,
       obscureText: true,
       hint: "Password",
+      validator: (String val) {
+        if (val.trim().isEmpty) {
+          return "Passworm must not be empty";
+        }
+        return null;
+      },
     );
   }
 
+  ///Forget Password section functions
   Widget forgetPassTextRow() {
     return Container(
       margin: EdgeInsets.only(top: _height / 40.0),
@@ -209,6 +230,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  ///Button for logging in and its functions
   Widget button() {
     return loginLoading
         ? CircularProgressIndicator()
@@ -217,116 +239,128 @@ class _SignInScreenState extends State<SignInScreen> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30.0)),
             onPressed: () async {
-              setState(() {
-                loginLoading = true;
-              });
-              try {
-                final AuthResult user = (await _auth.signInWithEmailAndPassword(
-                  email: emailController.text,
-                  password: passwordController.text,
-                ));
-                // .user;
-                if (user != null) {
-                  // showInSnackBar("Login Succesfull");
-                  var prefs = await SharedPreferences.getInstance();
-                  final userData = json.encode(
-                    {
-                      'userEmail': user.user.email,
-                      'userUid': user.user.uid,
-                      'password': passwordController.text,
-                    },
-                  );
-                  prefs.setString('userData', userData);
+              //check if form is valid and then sign in and store data in shared prefs
+              if (_key.currentState.validate()) {
+                setState(() {
+                  loginLoading = true;
+                });
+                try {
+                  final AuthResult user =
+                      (await _auth.signInWithEmailAndPassword(
+                    email: emailController.text,
+                    password: passwordController.text,
+                  ));
+                  // .user;
+                  //check user if not null save data to shared prefs
+                  // and navigate to next page
+                  if (user != null) {
+                    // showInSnackBar("Login Succesfull");
+//                    var prefs = await SharedPreferences.getInstance();
+//                    final userData = json.encode(
+//                      {
+//                        'userEmail': user.user.email,
+//                        'userUid': user.user.uid,
+//                        'password': passwordController.text,
+//                      },
+//                    );
+//                    prefs.setString('userData', userData);
 
-                  String userEmail = user.user.email;
-                  String userUid = user.user.uid;
+                    String userEmail = user.user.email;
+                    String userUid = user.user.uid;
 
-                  Navigator.pushReplacementNamed(context, PRIMARY_SCREEN);
+                    Provider.of<User>(context)
+                        .getCurrentUserData(userUid)
+                        .then((value) {
+                      Navigator.of(context)
+                          .pushReplacementNamed(NAVABAR_SCREEN);
+                    });
+                    setState(() {
+                      loginLoading = false;
+                    });
+
+                    // setState(() {
+                    //   _success = true;
+                    //   _userEmail = user.email;
+                    // });
+                  }
+                } catch (signUpError) {
                   setState(() {
                     loginLoading = false;
                   });
 
-                  // setState(() {
-                  //   _success = true;
-                  //   _userEmail = user.email;
-                  // });
-                }
-              } catch (signUpError) {
-                setState(() {
-                  loginLoading = false;
-                });
+                  ///Error Catching phase
+                  if (signUpError is PlatformException) {
+                    if (signUpError.code == 'ERROR_INVALID_EMAIL') {
+                      showDialog(
+                          context: context,
+                          child: AlertDialog(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(18.0),
+                                side: BorderSide(
+                                  color: Colors.red[400],
+                                )),
+                            title: Text("Incorrect Email"),
+                            actions: <Widget>[
+                              FlatButton(
+                                child: Text(
+                                  "OK",
+                                  style: TextStyle(color: Colors.red[400]),
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              )
+                            ],
+                          ));
+                    }
 
-                if (signUpError is PlatformException) {
-                  if (signUpError.code == 'ERROR_INVALID_EMAIL') {
-                    showDialog(
-                        context: context,
-                        child: AlertDialog(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(18.0),
-                              side: BorderSide(
-                                color: Colors.red[400],
-                              )),
-                          title: Text("Incorrect Email"),
-                          actions: <Widget>[
-                            FlatButton(
-                              child: Text(
-                                "OK",
-                                style: TextStyle(color: Colors.red[400]),
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            )
-                          ],
-                        ));
-                  }
+                    if (signUpError.code == 'ERROR_WRONG_PASSWORD') {
+                      showDialog(
+                          context: context,
+                          child: AlertDialog(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(18.0),
+                                side: BorderSide(
+                                  color: Colors.red[400],
+                                )),
+                            title: Text("Wrong Password"),
+                            actions: <Widget>[
+                              FlatButton(
+                                child: Text(
+                                  "OK",
+                                  style: TextStyle(color: Colors.red[400]),
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              )
+                            ],
+                          ));
+                    }
 
-                  if (signUpError.code == 'ERROR_WRONG_PASSWORD') {
-                    showDialog(
-                        context: context,
-                        child: AlertDialog(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(18.0),
-                              side: BorderSide(
-                                color: Colors.red[400],
-                              )),
-                          title: Text("Wrong Password"),
-                          actions: <Widget>[
-                            FlatButton(
-                              child: Text(
-                                "OK",
-                                style: TextStyle(color: Colors.red[400]),
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            )
-                          ],
-                        ));
-                  }
-
-                  if (signUpError.code == 'ERROR_USER_NOT_FOUND') {
-                    showDialog(
-                        context: context,
-                        child: AlertDialog(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(18.0),
-                              side: BorderSide(
-                                color: Colors.red[400],
-                              )),
-                          title: Text("No user exists"),
-                          actions: <Widget>[
-                            FlatButton(
-                              child: Text(
-                                "OK",
-                                style: TextStyle(color: Colors.red[400]),
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            )
-                          ],
-                        ));
+                    if (signUpError.code == 'ERROR_USER_NOT_FOUND') {
+                      showDialog(
+                          context: context,
+                          child: AlertDialog(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(18.0),
+                                side: BorderSide(
+                                  color: Colors.red[400],
+                                )),
+                            title: Text("No user exists"),
+                            actions: <Widget>[
+                              FlatButton(
+                                child: Text(
+                                  "OK",
+                                  style: TextStyle(color: Colors.red[400]),
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              )
+                            ],
+                          ));
+                    }
                   }
                 }
               }
@@ -360,6 +394,7 @@ class _SignInScreenState extends State<SignInScreen> {
           );
   }
 
+  ///Function to go to signup page for creating account
   Widget signUpTextRow() {
     return Container(
       margin: EdgeInsets.only(top: _height / 120.0),

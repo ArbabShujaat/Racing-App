@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,16 +7,15 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:hexcolor/hexcolor.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:racingApp/Constants/constant.dart';
+import 'package:racingApp/Providers/user.dart';
 import 'package:racingApp/Widgets/custom_shape.dart';
 import 'package:racingApp/Widgets/custom_textfield.dart';
 import 'package:racingApp/Widgets/customappbar.dart';
 import 'package:racingApp/Widgets/responsive_widget.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -33,6 +31,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _medium;
   bool signupLoading = false;
   String imageUrl;
+  var _formKey = GlobalKey<FormState>();
 
   TextEditingController firstnameController = TextEditingController();
 
@@ -67,6 +66,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _large = ResponsiveWidget.isScreenLarge(_width, _pixelRatio);
     _medium = ResponsiveWidget.isScreenMedium(_width, _pixelRatio);
 
+    ///Main function for screen ui
     return Material(
       child: Scaffold(
         body: Container(
@@ -96,6 +96,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  ///Function to make pick profile image ui
   Widget clipShape() {
     return Stack(
       children: <Widget>[
@@ -165,11 +166,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  ///Sign up form ui here
   Widget form() {
     return Container(
       margin: EdgeInsets.only(
           left: _width / 12.0, right: _width / 12.0, top: _height / 20.0),
       child: Form(
+        key: _formKey,
         child: Column(
           children: <Widget>[
             nameTextFormField(),
@@ -188,12 +191,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  ///Custom form fields for form elements section
   Widget nameTextFormField() {
     return CustomTextField(
       keyboardType: TextInputType.text,
       icon: Icons.person,
       hint: "Name",
       textEditingController: firstnameController,
+      validator: (String val) {
+        if (val.trim().isEmpty) {
+          return "Name must not be empty";
+        }
+        return null;
+      },
     );
   }
 
@@ -203,6 +213,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       icon: Icons.email,
       hint: "Email ID",
       textEditingController: emailController,
+      validator: (String val) {
+        if (val.trim().isEmpty) {
+          return "Email must not be empty";
+        }
+        return null;
+      },
     );
   }
 
@@ -213,6 +229,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       icon: Icons.lock,
       hint: "Password",
       textEditingController: passwordController,
+      validator: (String val) {
+        if (val.trim().isEmpty) {
+          return "Password must not be empty";
+        }
+        return null;
+      },
     );
   }
 
@@ -223,6 +245,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       icon: Icons.phone,
       hint: "Phone Number",
       textEditingController: phoneNumberContoller,
+      validator: (String val) {
+        if (val.trim().isEmpty) {
+          return "Number must not be empty";
+        }
+        return null;
+      },
     );
   }
 
@@ -233,9 +261,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
       icon: Icons.card_travel,
       hint: "Vehicle Details",
       textEditingController: vehicleDetailsController,
+      validator: (String val) {
+        if (val.trim().isEmpty) {
+          return "Vehicle Details must not be empty";
+        }
+        return null;
+      },
     );
   }
 
+  ///Terms and conditions checkbox
   Widget acceptTermsTextRow() {
     return Container(
       margin: EdgeInsets.only(top: _height / 100.0),
@@ -261,6 +296,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  ///Sign Up button function
+  //TODO form validation for sign up form
   Widget button() {
     return signupLoading
         ? CircularProgressIndicator()
@@ -269,31 +306,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30.0)),
             onPressed: () async {
-              if (imagecheck) {
+              //Condition to see if profile image is uploaded
+              if (imagecheck && _formKey.currentState.validate()) {
                 signUp();
               } else {
-                showDialog(
-                    context: context,
-                    child: AlertDialog(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(18.0),
-                          side: BorderSide(
-                            color: Colors.red[400],
-                          )),
-                      title: Text("Wait..."),
-                      content: Text("Image Not Uploaded"),
-                      actions: <Widget>[
-                        FlatButton(
-                          child: Text(
-                            "OK",
-                            style: TextStyle(color: Colors.red[400]),
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        )
-                      ],
-                    ));
+                imagecheck == false
+                    ? showDialog(
+                        context: context,
+                        child: AlertDialog(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(18.0),
+                              side: BorderSide(
+                                color: Colors.red[400],
+                              )),
+                          title: Text("Wait..."),
+                          content: Text("Image Not Uploaded"),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text(
+                                "OK",
+                                style: TextStyle(color: Colors.red[400]),
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            )
+                          ],
+                        ))
+                    : null;
               }
             },
             textColor: Colors.white,
@@ -317,6 +357,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
   }
 
+  ///Create account with social media function
   Widget infoTextRow() {
     return Container(
       margin: EdgeInsets.only(top: _height / 40.0),
@@ -334,6 +375,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  ///Going to sign in Page function
   Widget signInTextRow() {
     return Container(
       margin: EdgeInsets.only(top: _height / 20.0),
@@ -366,6 +408,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  ///Firebase creating user with email & password and error handling
   Future<void> signUp() async {
     setState(() {
       signupLoading = true;
@@ -378,21 +421,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ));
 
       if (user != null) {
-        var prefs = await SharedPreferences.getInstance();
-        final userData = json.encode(
-          {
-            'userEmail': user.user.email,
-            'userUid': user.user.uid,
-            'password': passwordController.text,
-          },
-        );
-        prefs.setString('userData', userData);
+//        var prefs = await SharedPreferences.getInstance();
+//        final userData = json.encode(
+//          {
+//            'userEmail': user.user.email,
+//            'userUid': user.user.uid,
+//            'password': passwordController.text,
+//          },
+//        );
+//        prefs.setString('userData', userData);
         String userEmail = user.user.email;
         String userUid = user.user.uid;
 
         await addUsertoFirebase(userUid);
 
-        Navigator.pushReplacementNamed(context, PRIMARY_SCREEN);
+        Provider.of<User>(context).getCurrentUserData(userUid).then((value) {
+          Navigator.of(context).pushReplacementNamed(NAVABAR_SCREEN);
+        });
         setState(() {
           signupLoading = false;
         });
@@ -408,6 +453,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         signupLoading = false;
       });
 
+      //Error handling
       if (signUpError is PlatformException) {
         if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
           showDialog(
@@ -484,17 +530,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  ///function to add user data to a firebase collection
   Future<void> addUsertoFirebase(String userUid) async {
-    await Firestore.instance.collection("Users").add({
+    await Firestore.instance.collection("Users").document(userUid).setData({
       'email': emailController.text,
       'name': firstnameController.text,
       'vehicedetails': vehicleDetailsController.text,
       'phonenumber': phoneNumberContoller.text,
       'useruid': userUid,
       'userimage': imageUrl,
+      'location': 'disabled'
     });
   }
 
+  ///Picking up user profile image
   Widget pic() {
     return imagecheck
         ? CircleAvatar(maxRadius: 65, backgroundImage: FileImage(image))

@@ -1,5 +1,29 @@
 import 'package:flutter/material.dart';
+class Productc {
+  final String image,
+      title,
+      description,
+      price,
+      id,
+      sellerEmail,
+      sellerPhoneNumber,
+      sellerUserUid,
+      productCategory,
+      sellerName;
 
+  Productc({
+    this.productCategory,
+    this.id,
+    this.image,
+    this.title,
+    this.price,
+    this.description,
+    this.sellerEmail,
+    this.sellerPhoneNumber,
+    this.sellerUserUid,
+    this.sellerName
+  });
+}
 class Product {
   final String image, title, description;
   final int price, id;

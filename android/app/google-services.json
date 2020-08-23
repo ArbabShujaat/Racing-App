@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "598123011760",
+    "firebase_url": "https://racing-app-55a9e.firebaseio.com",
+    "project_id": "racing-app-55a9e",
+    "storage_bucket": "racing-app-55a9e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:598123011760:android:30b00399e6271e2037a575",
+        "android_client_info": {
+          "package_name": "com.example.racingApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "598123011760-plo77p6d1ojoqjfa032vn2vidcetut1p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgdYtolp6vVmS2FRF6ZpWHJhQmfbvcAXk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "598123011760-plo77p6d1ojoqjfa032vn2vidcetut1p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

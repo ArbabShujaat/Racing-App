@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:provider/provider.dart';
 import 'package:racingApp/Constants/constant.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:progress_indicators/progress_indicators.dart';
+import 'package:racingApp/Providers/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -26,11 +29,17 @@ class SplashScreenState extends State<SplashScreen>
 
   Future<void> navigationPage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
+    FirebaseUser currentUser = await FirebaseAuth.instance.currentUser();
     if (prefs.getBool('FirstTime') == null)
       Navigator.of(context).pushReplacementNamed(WELCOME_PAGE);
     else
-      Navigator.of(context).pushReplacementNamed(PRIMARY_SCREEN);
+      currentUser != null
+          ? Provider.of<User>(context)
+              .getCurrentUserData(currentUser.uid)
+              .then((value) {
+              Navigator.of(context).pushReplacementNamed(NAVABAR_SCREEN);
+            })
+          : Navigator.of(context).pushReplacementNamed(LOGIN_SCREEN);
   }
 
   @override

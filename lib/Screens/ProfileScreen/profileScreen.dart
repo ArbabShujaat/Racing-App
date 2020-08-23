@@ -3,12 +3,16 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:racingApp/Constants/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+bool status = true;
 
 class Profile extends StatelessWidget {
   @override
@@ -256,7 +260,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                           .copyWith(primaryColor: primarycolor),
                       child: TextField(
                         decoration: InputDecoration(
-                          hintText: 'Name',
+                          hintText: 'Diplay Name HERE',
                           contentPadding: EdgeInsets.all(5.0),
                           hintStyle: TextStyle(color: Colors.grey),
                         ),
@@ -287,7 +291,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                           .copyWith(primaryColor: primarycolor),
                       child: TextField(
                         decoration: InputDecoration(
-                          hintText: 'Enginer Hp etc',
+                          hintText: 'Diplay Car Details Here',
                           contentPadding: EdgeInsets.all(5.0),
                           hintStyle: TextStyle(color: Colors.grey),
                         ),
@@ -299,6 +303,36 @@ class SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     margin: EdgeInsets.only(left: 30.0, right: 30.0),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        child: Text(
+                          'Online',
+                          style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.bold,
+                              color: primarycolor),
+                        ),
+                        margin:
+                            EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
+                      ),
+                      Padding(
+                        padding:
+                            EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
+                        child: Switch(
+                          activeColor: Colors.green,
+                          value: status,
+                          onChanged: (value) {
+                            print("VALUE : $value");
+                            setState(() {
+                              status = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,

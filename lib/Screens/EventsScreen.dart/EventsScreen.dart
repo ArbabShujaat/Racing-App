@@ -17,8 +17,20 @@ class EventScreen extends StatelessWidget {
         // each event have a color
 
         appBar: AppBar(
-          title: Text("EVENT"),
+          title: Text(event.title),
           centerTitle: true,
+          actions: <Widget>[
+//        IconButton(
+//          icon: SvgPicture.asset(
+//            "assets/icons/search.svg",
+//            // By default our  icon color is white
+//            color: Colors.white,
+//          ),
+//          onPressed: () {},
+//        ),
+            SizedBox(width: kDefaultPaddin / 2),
+            SizedBox(width: kDefaultPaddin / 2),
+          ],
         ),
         body: Container(
           height: height,
@@ -26,7 +38,7 @@ class EventScreen extends StatelessWidget {
           child: ListView(
             children: <Widget>[
               Container(
-                color: Colors.grey[350],
+                color: Colors.white,
                 height: height / 2,
                 width: width,
                 child: CarouselSlider(
@@ -45,7 +57,7 @@ class EventScreen extends StatelessWidget {
                           margin: EdgeInsets.symmetric(horizontal: 5.0),
                           decoration: BoxDecoration(
                               image: DecorationImage(
-                                  image: AssetImage(i), fit: BoxFit.cover)),
+                                  image: NetworkImage(i), fit: BoxFit.cover)),
                         );
                       },
                     );

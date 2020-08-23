@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+
 class Events {
-  final List<String> imageUrls;
+  final List<dynamic> imageUrls;
   final String title, description, date;
   final id;
 
