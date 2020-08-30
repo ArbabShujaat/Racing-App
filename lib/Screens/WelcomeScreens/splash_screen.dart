@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:racingApp/Constants/constant.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:progress_indicators/progress_indicators.dart';
 import 'package:racingApp/Providers/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

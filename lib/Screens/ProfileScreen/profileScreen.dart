@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:racingApp/Constants/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:provider/provider.dart';
+import 'package:racingApp/Providers/user.dart';
 
 bool status = true;
 
@@ -38,12 +40,6 @@ class SettingsScreen extends StatefulWidget {
 class SettingsScreenState extends State<SettingsScreen> {
   TextEditingController controllerName;
   TextEditingController controllerCarDetails;
-
-  SharedPreferences prefs;
-
-  String id = '';
-  String name = '';
-  String aboutMe = '';
   String photoUrl = '';
 
   bool isLoading = false;
@@ -52,25 +48,7 @@ class SettingsScreenState extends State<SettingsScreen> {
   final FocusNode focusNodeNickname = FocusNode();
   final FocusNode focusNodeAboutMe = FocusNode();
 
-  @override
-  void initState() {
-    super.initState();
-    readLocal();
-  }
 
-  void readLocal() async {
-    prefs = await SharedPreferences.getInstance();
-    id = prefs.getString('id') ?? '';
-    name = prefs.getString('name') ?? '';
-    aboutMe = prefs.getString('aboutMe') ?? '';
-    photoUrl = prefs.getString('photoUrl') ?? '';
-
-    controllerName = TextEditingController(text: name);
-    controllerCarDetails = TextEditingController(text: aboutMe);
-
-    // Force refresh input
-    setState(() {});
-  }
 
   Future getImage() async {
     File image = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -85,8 +63,8 @@ class SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future uploadFile() async {
-    String fileName = id;
-    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
+    String filePath = '${DateTime.now()}.png';
+    StorageReference reference = FirebaseStorage.instance.ref().child(filePath);
     StorageUploadTask uploadTask = reference.putFile(avatarImageFile);
     StorageTaskSnapshot storageTaskSnapshot;
     uploadTask.onComplete.then((value) {
@@ -94,22 +72,6 @@ class SettingsScreenState extends State<SettingsScreen> {
         storageTaskSnapshot = value;
         storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
           photoUrl = downloadUrl;
-          Firestore.instance.collection('users').document(id).updateData({
-            'name': name,
-            'carDetails': aboutMe,
-            'photoUrl': photoUrl
-          }).then((data) async {
-            await prefs.setString('photoUrl', photoUrl);
-            setState(() {
-              isLoading = false;
-            });
-            Fluttertoast.showToast(msg: "Upload success");
-          }).catchError((err) {
-            setState(() {
-              isLoading = false;
-            });
-            Fluttertoast.showToast(msg: err.toString());
-          });
         }, onError: (err) {
           setState(() {
             isLoading = false;
@@ -138,15 +100,16 @@ class SettingsScreenState extends State<SettingsScreen> {
       isLoading = true;
     });
 
-    Firestore.instance.collection('users').document(id).updateData({
-      'name': name,
-      'carDetails': aboutMe,
-      'photoUrl': photoUrl
+    UserModel userProfile = Provider.of<User>(context,listen: false).userProfile;
+    if (photoUrl==''){
+      photoUrl = userProfile.userimage;
+    }
+    Firestore.instance.collection('Users').document(userProfile.useruid).updateData({
+      'name': controllerName.text,
+      'vehicedetails': controllerCarDetails.text,
+      "userimage": photoUrl
     }).then((data) async {
-      await prefs.setString('name', name);
-      await prefs.setString('carDetails', aboutMe);
-      await prefs.setString('photoUrl', photoUrl);
-
+      await Provider.of<User>(context,listen: false).getCurrentUserData(userProfile.useruid);
       setState(() {
         isLoading = false;
       });
@@ -163,6 +126,11 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    UserModel userProfile = Provider.of<User>(context).userProfile;
+    controllerName = TextEditingController(text: userProfile.name);
+    controllerCarDetails = TextEditingController(text: userProfile.vehicledetails);
+    print(controllerCarDetails.text);
+    photoUrl = userProfile.userimage;
     return Stack(
       children: <Widget>[
         SingleChildScrollView(
@@ -259,15 +227,14 @@ class SettingsScreenState extends State<SettingsScreen> {
                       data: Theme.of(context)
                           .copyWith(primaryColor: primarycolor),
                       child: TextField(
+                        minLines: 1,
+                        maxLines: 2,
                         decoration: InputDecoration(
                           hintText: 'Diplay Name HERE',
                           contentPadding: EdgeInsets.all(5.0),
                           hintStyle: TextStyle(color: Colors.grey),
                         ),
                         controller: controllerName,
-                        onChanged: (value) {
-                          name = value;
-                        },
                         focusNode: focusNodeNickname,
                       ),
                     ),
@@ -290,15 +257,14 @@ class SettingsScreenState extends State<SettingsScreen> {
                       data: Theme.of(context)
                           .copyWith(primaryColor: primarycolor),
                       child: TextField(
+                        minLines: 1,
+                        maxLines: 5,
                         decoration: InputDecoration(
                           hintText: 'Diplay Car Details Here',
                           contentPadding: EdgeInsets.all(5.0),
                           hintStyle: TextStyle(color: Colors.grey),
                         ),
                         controller: controllerCarDetails,
-                        onChanged: (value) {
-                          aboutMe = value;
-                        },
                         focusNode: focusNodeAboutMe,
                       ),
                     ),
@@ -323,9 +289,20 @@ class SettingsScreenState extends State<SettingsScreen> {
                             EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
                         child: Switch(
                           activeColor: Colors.green,
-                          value: status,
+                          value: Provider.of<User>(context,listen: false).location== 'enabled'?true:false,
                           onChanged: (value) {
                             print("VALUE : $value");
+                            if (value==true){
+                              Provider.of<User>(context).location = 'enabled';
+                              Firestore.instance.collection('Users').document(userProfile.useruid).updateData({
+                                'location':'enabled'
+                              });
+                            }else if (value == false){
+                              Provider.of<User>(context).location = 'disabled';
+                              Firestore.instance.collection('Users').document(userProfile.useruid).updateData({
+                                'location':'disabled'
+                              });
+                            }
                             setState(() {
                               status = value;
                             });

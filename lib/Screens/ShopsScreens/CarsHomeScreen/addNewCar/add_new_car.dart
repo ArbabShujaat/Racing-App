@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:flutter/material.dart';
@@ -12,9 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:racingApp/Constants/constant.dart';
 import 'package:racingApp/Providers/user.dart';
-import 'package:racingApp/Widgets/custom_shape.dart';
 import 'package:racingApp/Widgets/custom_textfield.dart';
-import 'package:racingApp/Widgets/customappbar.dart';
 import 'package:racingApp/Widgets/responsive_widget.dart';
 import 'package:racingApp/services/payment_service.dart';
 
@@ -272,6 +269,28 @@ class _AddCarScreenState extends State<AddCarScreen> {
                       child: FlatButton(
                         onPressed: () {
                           setState(() {
+                            _productCategory = "Sports Car";
+                            _selectProductCategory = false;
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Sports Car",
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (_selectProductCategory == true)
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: FlatButton(
+                        onPressed: () {
+                          setState(() {
                             _productCategory = "Car Parts";
                             _selectProductCategory = false;
                           });
@@ -469,7 +488,7 @@ class _AddCarScreenState extends State<AddCarScreen> {
                 side: BorderSide(
                   color: Colors.red[400],
                 )),
-            title: Text(response.message),
+            title: Text('Your product has been added.'),
             actions: <Widget>[
               FlatButton(
                 child: Text(
@@ -477,16 +496,17 @@ class _AddCarScreenState extends State<AddCarScreen> {
                   style: TextStyle(color: Colors.red[400]),
                 ),
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.of(context).pushNamedAndRemoveUntil(PRIMARY_SCREEN, (route) => false);
                 },
               )
             ],
           ));
 
-      //Navigator.of(context).pushReplacementNamed(PRIMARY_SCREEN);
       setState(() {
         signupLoading = false;
       });
+      
+
     } catch (signUpError) {
       setState(() {
         signupLoading = false;
@@ -519,8 +539,8 @@ class _AddCarScreenState extends State<AddCarScreen> {
   ///function to add user data to a firebase collection
   Future<void> addProductToStore(UserModel userModel) async {
     await Firestore.instance.collection("carproducts").add({
-      'timestamp': Timestamp.now(),
-      'productid': productIDController,
+      'datetime': Timestamp.now(),
+      'productid': productIDController.text,
       'title': productTitleController.text,
       'productdetails': productDescriptionController.text,
       'productprice': productPriceNumberContoller.text,
@@ -554,7 +574,7 @@ class _AddCarScreenState extends State<AddCarScreen> {
                 });
 
                 final FirebaseStorage _storgae = FirebaseStorage(
-                    storageBucket: 'gs://speakany-94f37.appspot.com/');
+                    storageBucket: 'gs://racing-app-55a9e.appspot.com/');
                 StorageUploadTask uploadTask;
                 String filePath = '${DateTime.now()}.png';
                 uploadTask = _storgae.ref().child(filePath).putFile(image);

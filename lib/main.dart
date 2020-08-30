@@ -1,19 +1,15 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:racingApp/Screens/Cart/shoppingCart.dart';
 import 'package:racingApp/Screens/EventsScreen.dart/EventList.dart';
-import 'package:racingApp/Screens/MapsScreens.dart/maps_full_screen.dart';
 import 'package:racingApp/Screens/ProfileScreen/profileScreen.dart';
 import 'package:racingApp/Screens/Registration/login.dart';
 import 'package:racingApp/Screens/Registration/signup.dart';
 import 'package:racingApp/Screens/WelcomeScreens/getStartedScreen.dart';
+import 'package:racingApp/Screens/orders/order_history.dart';
 import 'package:racingApp/Screens/primary_screen.dart';
 import 'package:racingApp/Screens/WelcomeScreens/sider_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hexcolor/hexcolor.dart';
-import 'package:racingApp/models/Events.dart';
-
 import 'Constants/constant.dart';
 import 'Providers/user.dart';
 import 'Screens/ChatScreens/all_chats_screen.dart';
@@ -61,6 +57,7 @@ class MyApp extends StatelessWidget {
           NAVABAR_SCREEN: (BuildContext context) => BottomNav(),
           CHAT_SCREEN: (BuildContext context) => AllChatsScreen(),
           CART_SCREEN: (BuildContext context) => CartScreen(),
+          ORDER_HISTORY: (BuildContext context) => OrderHistory()
         },
         initialRoute: SPLASH_SCREEN,
       ),

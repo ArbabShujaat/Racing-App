@@ -15,6 +15,7 @@ const String NAVABAR_SCREEN = "/navBarScreen";
 const String CHAT_SCREEN = "/ChatScreen";
 const String EVENTLIST_SCREEN = "/EventListScreen";
 const String CART_SCREEN = "/CartScreen";
+const String ORDER_HISTORY = "/orderHistory";
 //Colours
 Color primarycolor = Colors.red[400];
 

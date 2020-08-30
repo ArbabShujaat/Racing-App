@@ -2,16 +2,13 @@ import 'package:carousel_pro/carousel_pro.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:racingApp/Constants/constant.dart';
 import 'package:racingApp/Providers/user.dart';
-import 'package:racingApp/Screens/EventsScreen.dart/EventsScreen.dart';
 import 'package:racingApp/Screens/MapsScreens.dart/map_screen_initializer.dart';
 import 'package:racingApp/Widgets/responsive_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:racingApp/models/Events.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'dart:io';
 
@@ -69,7 +66,7 @@ class _PrimaryScreenState extends State<PrimaryScreen> {
 
                 ///This container contains the half screen map on the screen
                 Container(
-                  height: height / 3.8,
+                  height: height / 3,
                   width: width / 2,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
@@ -289,33 +286,37 @@ class _PrimaryScreenState extends State<PrimaryScreen> {
                             spreadRadius: 3.0)
                       ],
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Carousel(
-                        overlayShadow: false,
-                        dotBgColor: Colors.transparent,
-                        // dotSize: 15,
-                        // dotIncreaseSize: 10,
-                        dotSize: 6,
-                        dotSpacing: 30,
-                        dotIncreasedColor: Colors.red,
-                        dotColor: Colors.red,
-                        images: [
-                          Image.asset(
-                            "assets/ad2.jpeg",
-                            fit: BoxFit.fill,
-                          ),
-                          Image.asset(
-                            "assets/ad1.jpeg",
-                            fit: BoxFit.fill,
-                          ),
-                          Image.asset(
-                            "assets/ad3.jpeg",
-                            fit: BoxFit.fill,
-                          ),
-                        ],
-                      ),
-                    ),
+                    child: StreamBuilder(
+                        stream:
+                            Firestore.instance.collection('ads').snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          List<dynamic> imageUrlList = [];
+                          final snapShotData = snapshot.data.documents;
+                          for (DocumentSnapshot document in snapShotData) {
+                            imageUrlList
+                                .add(NetworkImage(document.data['url']));
+                          }
+
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Carousel(
+                                overlayShadow: false,
+                                dotBgColor: Colors.transparent,
+                                // dotSize: 15,
+                                // dotIncreaseSize: 10,
+                                dotSize: 6,
+                                dotSpacing: 30,
+                                dotIncreasedColor: Colors.red,
+                                dotColor: Colors.red,
+                                images: imageUrlList),
+                          );
+                        }),
                   ),
                 ),
 
@@ -382,83 +383,94 @@ class _PrimaryScreenState extends State<PrimaryScreen> {
 
   /////////////////Events///////////////////
   Widget events(BuildContext context, double screenwidth, double height) {
-    return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(20)),
-      child: Stack(
-        children: <Widget>[
-          ClipRRect(
+    return StreamBuilder(
+        stream: Firestore.instance.collection('events').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          final snapShotData = snapshot.data.documents;
+          return ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(20)),
-            child: Container(
-              decoration: new BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage(
-                        "assets/event.jpg",
-                      ),
-                      fit: BoxFit.fill),
-                  color: Colors.white,
-                  borderRadius: new BorderRadius.all(
-                    Radius.circular(20.0),
-                  )),
-              height: height,
-              width: screenwidth,
-            ),
-          ),
-          Positioned(
-            top: 8,
-            left: 13,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(18)),
-                color: Colors.black.withOpacity(0.6),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      height: 10,
-                      width: 10,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.green,
+            child: Stack(
+              children: <Widget>[
+                ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                  child: Container(
+                    decoration: new BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage(
+                              "assets/event.jpg",
+                            ),
+                            fit: BoxFit.fill),
+                        color: Colors.white,
+                        borderRadius: new BorderRadius.all(
+                          Radius.circular(20.0),
+                        )),
+                    height: height,
+                    width: screenwidth,
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  left: 13,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(18)),
+                      color: Colors.black.withOpacity(0.6),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            height: 10,
+                            width: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.green,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              "${snapShotData.length} Events",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          )
+                        ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        "4 Events",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Positioned(
+                  bottom: 5,
+                  right: 10,
+                  child: RaisedButton(
+                    color: Colors.red,
+                    onPressed: () {
+                      Navigator.pushNamed(context, EVENTLIST_SCREEN);
+                    },
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(color: Colors.red)),
+                    child: Text(
+                      "SEE ALL",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-                    )
-                  ],
-                ),
-              ),
+                    ),
+                  ),
+                )
+              ],
             ),
-          ),
-          Positioned(
-            bottom: 5,
-            right: 10,
-            child: RaisedButton(
-              color: Colors.red,
-              onPressed: () {
-                Navigator.pushNamed(context, EVENTLIST_SCREEN);
-              },
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18.0),
-                  side: BorderSide(color: Colors.red)),
-              child: Text(
-                "SEE ALL",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
+          );
+        });
   }
 
   ////////////Drawer///////////
@@ -466,10 +478,10 @@ class _PrimaryScreenState extends State<PrimaryScreen> {
   Widget drawer() {
     return Drawer(
       child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        // width: MediaQuery.of(context).size.width,
+        // height: MediaQuery.of(context).size.height,
+        child: ListView(
+          // crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
               color: Colors.red,
@@ -484,7 +496,7 @@ class _PrimaryScreenState extends State<PrimaryScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
-                              '''Welcome User !!''',
+                              '''Welcome ${Provider.of<User>(context, listen: false).userProfile.name} !!''',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
@@ -571,6 +583,31 @@ class _PrimaryScreenState extends State<PrimaryScreen> {
                 ),
                 title: Text(
                   "MY CHAT",
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: Divider(
+                color: Colors.red,
+                thickness: 2,
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                Navigator.pushNamed(context, ORDER_HISTORY);
+              },
+              child: ListTile(
+                leading: Icon(
+                  Icons.shopping_cart,
+                  color: Colors.red,
+                ),
+                title: Text(
+                  "MY Orders",
                   style: TextStyle(
                       fontSize: 18,
                       color: Colors.black,
@@ -773,75 +810,89 @@ class _PrimaryScreenState extends State<PrimaryScreen> {
 
   ///THis function the half page ui on the screen
   Widget map(BuildContext context, double screenwidth, double height) {
-    return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(20)),
-      child: Stack(
-        children: <Widget>[
-          Container(
-              decoration: new BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: new BorderRadius.all(
-                    Radius.circular(20.0),
-                  )),
-              height: height,
-              width: screenwidth,
-              child: MapInitializer()),
-          Positioned(
-            top: 8,
-            left: 13,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(18)),
-                color: Colors.black.withOpacity(0.6),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      height: 10,
-                      width: 10,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.green,
+    return StreamBuilder(
+        stream: Firestore.instance
+            .collection('Users')
+            .where('location', isEqualTo: 'enabled')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          final snapShotData = snapshot.data.documents;
+          return ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+            child: Stack(
+              children: <Widget>[
+                Container(
+                    decoration: new BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: new BorderRadius.all(
+                          Radius.circular(20.0),
+                        )),
+                    height: height,
+                    width: screenwidth,
+                    child: MapInitializer()),
+                Positioned(
+                  top: 8,
+                  left: 13,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(18)),
+                      color: Colors.black.withOpacity(0.6),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            height: 10,
+                            width: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.green,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              "Online( ${snapShotData.length} )",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          )
+                        ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        "Online( 21 )",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Positioned(
+                  bottom: 5,
+                  right: 10,
+                  child: RaisedButton(
+                    color: Colors.red,
+                    onPressed: () {
+                      Navigator.pushNamed(context, FULL_MAP);
+                    },
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(color: Colors.red)),
+                    child: Text(
+                      "Full Map",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-                    )
-                  ],
-                ),
-              ),
+                    ),
+                  ),
+                )
+              ],
             ),
-          ),
-          Positioned(
-            bottom: 5,
-            right: 10,
-            child: RaisedButton(
-              color: Colors.red,
-              onPressed: () {
-                Navigator.pushNamed(context, FULL_MAP);
-              },
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18.0),
-                  side: BorderSide(color: Colors.red)),
-              child: Text(
-                "Full Map",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
+          );
+        });
   }
 
   @override

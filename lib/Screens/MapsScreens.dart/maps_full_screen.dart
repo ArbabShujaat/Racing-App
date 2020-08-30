@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,9 @@ class FullScreenMap extends StatefulWidget {
 }
 
 class _FullScreenMapState extends State<FullScreenMap> {
+  BitmapDescriptor iconCurrentUser;
+  BitmapDescriptor iconOtherRacers;
+
   final GeolocatorService geoService = GeolocatorService();
   Completer<GoogleMapController> _controller = Completer();
 
@@ -28,12 +32,34 @@ class _FullScreenMapState extends State<FullScreenMap> {
   StreamSubscription<QuerySnapshot> _markerStreamSubscription;
   StreamSubscription<dynamic> _positionStream;
 
+  /// icon Marker
+  ///
+  Future<Uint8List> getMarker(String asset) async {
+    ByteData byteData = await DefaultAssetBundle.of(context).load(asset);
+    return byteData.buffer.asUint8List();
+  }
+
+  getIcons() async {
+    Uint8List imageDataUser = await getMarker("assets/red.png");
+    Uint8List imageDataRacers = await getMarker("assets/blue.png");
+    var iconUser = BitmapDescriptor.fromBytes(imageDataUser);
+    var iconRacers = BitmapDescriptor.fromBytes(imageDataRacers);
+    setState(() {
+      this.iconCurrentUser = iconUser;
+      this.iconOtherRacers = iconRacers;
+    });
+  }
+
   ///updating markers stream
   void _updateMarkers(List<DocumentSnapshot> documentList) {
     List<Marker> markers = [];
+
     documentList.forEach((DocumentSnapshot document) {
-      if (document.data['lat'] != null &&
-          document.data['useruid'] != widget.currentUserid) {
+      BitmapDescriptor markerIcon =
+          document.data['useruid'] != widget.currentUserid
+              ? iconOtherRacers
+              : iconCurrentUser;
+      if (document.data['lat'] != null) {
         markers.add(Marker(
           markerId: MarkerId(document.documentID),
           draggable: false,
@@ -112,7 +138,7 @@ class _FullScreenMapState extends State<FullScreenMap> {
                   ],
                 ));
           },
-          icon: BitmapDescriptor.defaultMarker,
+          icon: markerIcon,
           position: LatLng(document.data['lat'], document.data['lng']),
         ));
       }
@@ -154,6 +180,7 @@ class _FullScreenMapState extends State<FullScreenMap> {
 
   @override
   void initState() {
+    getIcons();
     _positionStream = geoService.getCurrentLocation().listen((position) {
       Firestore.instance
           .collection('Users')
@@ -165,12 +192,17 @@ class _FullScreenMapState extends State<FullScreenMap> {
 
     _markerStreamSubscription = Firestore.instance
         .collection("Users")
-        .where('location', isEqualTo: 'disabled')
+        .where('location', isEqualTo: 'enabled')
         .snapshots()
         .listen((snapshot) {
       print("lenght of stream" + snapshot.documents.length.toString());
       _updateMarkers(snapshot.documents);
     });
+
+    //      {
+    //   print("lenght of stream" + snapshot.documents.length.toString());
+    //   _updateMarkers(snapshot.documents);
+    // });
 
     super.initState();
   }

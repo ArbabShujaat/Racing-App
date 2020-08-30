@@ -2,15 +2,11 @@
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:racingApp/Constants/constant.dart';
 import 'package:racingApp/Screens/Cart/shoppingCart.dart';
 import 'package:racingApp/Screens/ChatScreens/all_chats_screen.dart';
 import 'package:racingApp/Screens/ProfileScreen/profileScreen.dart';
 import 'package:racingApp/Screens/primary_screen.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BottomNav extends StatefulWidget {
   @override

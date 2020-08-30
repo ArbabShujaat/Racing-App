@@ -1,8 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:racingApp/Constants/constant.dart';
-import 'package:racingApp/models/Cars.dart';
 import 'package:racingApp/models/Events.dart';
 
 class EventScreen extends StatelessWidget {

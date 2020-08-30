@@ -1,9 +1,5 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 
 class UserModel {
@@ -30,6 +26,7 @@ class User with ChangeNotifier{
   UserModel get userProfile => _userProfile;
   String _currentUserId;
   String get currentUserId => _currentUserId;
+  String location;
 //  String _currentUserEmail;
 //  String get currentUserEmail => _currentUserEmail;
 //  Future<void> getCurrentUser()async{
@@ -52,17 +49,16 @@ class User with ChangeNotifier{
 
   UserModel convertToUserModel(DocumentSnapshot docu) {
     var doc = docu.data;
+    location = doc['location'];
     return UserModel(
       name: doc['name'],
       email: doc['email'],
       phonenumber: doc['phonenumber'],
       userimage: doc['userimage'],
       useruid: doc['useruid'],
-      vehicledetails: doc['vehicledetails'],
+      vehicledetails: doc['vehicedetails'],
       location: doc['location']
     );
   }
-
-
 
 }

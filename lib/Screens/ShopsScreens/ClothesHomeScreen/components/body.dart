@@ -38,7 +38,7 @@ class _BodyState extends State<Body> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: kDefaultPaddin),
           child: SizedBox(
-            height: MediaQuery.of(context).size.height / 8.8,
+            height: MediaQuery.of(context).size.height / 8,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: clothesCategories.length,

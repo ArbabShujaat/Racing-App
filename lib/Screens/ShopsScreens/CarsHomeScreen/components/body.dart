@@ -30,7 +30,7 @@ class _BodyState extends State<Body> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: kDefaultPaddin),
           child: SizedBox(
-            height: MediaQuery.of(context).size.height / 8.8,
+            height: MediaQuery.of(context).size.height / 8,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: carsCategories.length,
@@ -101,7 +101,7 @@ class _BodyState extends State<Body> {
   Widget categoryItems(List<Product> categoryList, String category) {
     var productCategory = 'Car';
     if (category == carsCategories[1]) {
-      productCategory = 'Car';
+      productCategory = 'Sports Car';
     } else if (category == carsCategories[2]) {
       productCategory = "Car Parts";
     }
@@ -120,6 +120,7 @@ class _BodyState extends State<Body> {
               );
             }
             final snapShotData = snapshot.data.documents;
+            print(productCategory);
             if (snapShotData.length == 0) {
               return Center(
                 child: Text("No products added"),

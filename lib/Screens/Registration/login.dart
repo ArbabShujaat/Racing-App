@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,9 +7,7 @@ import 'package:racingApp/Constants/constant.dart';
 import 'package:racingApp/Providers/user.dart';
 import 'package:racingApp/Widgets/custom_shape.dart';
 import 'package:racingApp/Widgets/custom_textfield.dart';
-import 'package:racingApp/Widgets/customappbar.dart';
 import 'package:racingApp/Widgets/responsive_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInPage extends StatelessWidget {
   @override

@@ -1,7 +1,6 @@
 import 'package:racingApp/Animation/FadeAnimation.dart';
 import 'package:racingApp/Constants/constant.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomePage extends StatefulWidget {
   static String get routeName => '@routes/welcome-page';
